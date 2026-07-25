@@ -42,7 +42,8 @@ The contact form endpoint requires Cloudflare Pages Functions or a compatible lo
 3. Use no build command.
 4. Set the output directory to `/`.
 5. Add the Resend environment variables listed below.
-6. Deploy.
+6. Add the Turnstile environment variable listed below.
+7. Deploy.
 
 Cloudflare Pages will detect `functions/api/contact.js` and expose it at `/api/contact`.
 
@@ -60,6 +61,7 @@ Update the clearly marked `BUSINESS_CONFIG` object in `js/main.js`:
 - `serviceArea`
 - `businessHours`
 - `streetAddress`, only when an address should be displayed
+- `turnstileSiteKey`
 
 When `phone` is still `[PHONE NUMBER]`, the final call button is hidden automatically. Footer phone and email links only appear when configured.
 
@@ -71,13 +73,25 @@ To replace it, use the same filename or update the image paths in `index.html`. 
 
 ## Contact Form Configuration
 
-The optional Cloudflare Pages Function sends mail through Resend. Configure these environment variables in Cloudflare Pages:
+The optional Cloudflare Pages Function sends mail through Resend and can verify Cloudflare Turnstile tokens before sending. Configure these environment variables in Cloudflare Pages:
 
 - `RESEND_API_KEY`
 - `CONTACT_TO_EMAIL`
 - `CONTACT_FROM_EMAIL`
+- `TURNSTILE_SECRET_KEY`
 
-The browser never receives the API key. If any variable is missing, `/api/contact` returns `503` and the form tells the visitor the form is not configured.
+The browser never receives the Resend API key. If any Resend variable is missing, `/api/contact` returns `503` and the form tells the visitor the form is not configured.
+
+To enable Turnstile spam protection:
+
+1. In Cloudflare, create a Turnstile widget for the site.
+2. Copy the public site key into `BUSINESS_CONFIG.turnstileSiteKey` in `js/main.js`.
+3. Add the secret key as `TURNSTILE_SECRET_KEY` in Cloudflare Pages environment variables.
+4. Redeploy the site.
+
+When `TURNSTILE_SECRET_KEY` is set, `/api/contact` requires a valid Turnstile token before sending email. Keep the existing honeypot field as a low-cost first filter.
+
+For additional protection, add a Cloudflare WAF rate limiting rule for `POST /api/contact` so repeated submissions from the same client are challenged or blocked before they reach the Pages Function.
 
 ## SEO Updates
 
@@ -98,6 +112,7 @@ Replace every placeholder before launch:
 - `[PHONE NUMBER]`
 - `[EMAIL ADDRESS]`
 - `[DOMAIN NAME]`
+- `[TURNSTILE SITE KEY]`
 - Business hours, if they should be shown
 - Street address, only if it should be public
 - Privacy Policy placeholder

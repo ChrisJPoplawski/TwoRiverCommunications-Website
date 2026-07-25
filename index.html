@@ -243,100 +243,76 @@
       </section>
 
       <section class="section contact-section" id="contact" aria-labelledby="contact-title">
-        <div class="container contact-grid">
-          <div class="contact-copy reveal">
-            <h2 id="contact-title">Let&rsquo;s Talk About Your Business Technology</h2>
+        <div class="container">
+          <div class="section-intro contact-intro reveal">
+            <h2 id="contact-title">Ready for Technology That Works for Your Business?</h2>
             <p>Tell us what you are trying to improve, replace, or support.</p>
-
-            <dl class="contact-details">
-              <div>
-                <dt>Phone</dt>
-                <dd><span data-business-field="phone">[PHONE NUMBER]</span></dd>
-              </div>
-              <div>
-                <dt>Email</dt>
-                <dd><a data-business-field="emailLink" href="mailto:[EMAIL ADDRESS]">[EMAIL ADDRESS]</a></dd>
-              </div>
-              <div>
-                <dt>Service area</dt>
-                <dd><span data-business-field="serviceArea">The Lehigh Valley and surrounding area</span></dd>
-              </div>
-              <div hidden data-business-hours>
-                <dt>Business hours</dt>
-                <dd data-business-field="hours"></dd>
-              </div>
-            </dl>
           </div>
 
-          <form class="contact-form reveal" action="/api/contact" method="post" novalidate data-contact-form>
-            <div class="form-status" role="status" aria-live="polite" data-form-status></div>
-            <div class="form-row">
-              <label for="name">Name</label>
-              <input id="name" name="name" type="text" autocomplete="name" required maxlength="100">
-              <span class="field-error" id="name-error"></span>
-            </div>
-            <div class="form-row">
-              <label for="company">Company or organization</label>
-              <input id="company" name="company" type="text" autocomplete="organization" required maxlength="120">
-              <span class="field-error" id="company-error"></span>
-            </div>
-            <div class="form-row">
-              <label for="email">Business email</label>
-              <input id="email" name="email" type="email" autocomplete="email" required maxlength="160">
-              <span class="field-error" id="email-error"></span>
-            </div>
-            <div class="form-row">
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" autocomplete="tel" required maxlength="40">
-              <span class="field-error" id="phone-error"></span>
-            </div>
-            <div class="form-row">
-              <label for="employees">Number of employees <span>optional</span></label>
-              <input id="employees" name="employees" type="text" inputmode="numeric" maxlength="30">
-              <span class="field-error" id="employees-error"></span>
-            </div>
-            <div class="form-row">
-              <label for="service">Service needed</label>
-              <select id="service" name="service" required>
-                <option value="">Select a service</option>
-                <option>Managed IT Services</option>
-                <option>Microsoft 365 or Cloud Services</option>
-                <option>Cybersecurity</option>
-                <option>Business Voice or VoIP</option>
-                <option>Network or Managed Wi-Fi</option>
-                <option>IP Security Camera Systems</option>
-                <option>Fixed Wireless or Connectivity</option>
-                <option>Workstation or Infrastructure Support</option>
-                <option>Technology Consulting</option>
-                <option>Other</option>
-              </select>
-              <span class="field-error" id="service-error"></span>
-            </div>
-            <div class="form-row form-row--full">
-              <label for="message">Message</label>
-              <textarea id="message" name="message" rows="6" required maxlength="2000"></textarea>
-              <span class="field-error" id="message-error"></span>
-            </div>
-            <div class="form-row form-row--full checkbox-row">
-              <input id="privacy" name="privacy" type="checkbox" required>
-              <label for="privacy">I understand this form sends business contact information so Two River Communications can respond to my request.</label>
-              <span class="field-error" id="privacy-error"></span>
-            </div>
-            <div class="honeypot" aria-hidden="true">
-              <label for="website">Website</label>
-              <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
-            </div>
-            <button class="button" type="submit" data-submit-button>Send Message</button>
-          </form>
-        </div>
-      </section>
-
-      <section class="final-cta" aria-labelledby="final-cta-title">
-        <div class="container final-cta-inner reveal">
-          <h2 id="final-cta-title">Ready for Technology That Works for Your Business?</h2>
-          <div class="final-actions">
-            <a class="button" href="#contact">Schedule a Consultation</a>
-            <a class="button button--secondary" href="#contact" data-call-button>Call [PHONE NUMBER]</a>
+          <div class="contact-grid">
+            <form class="contact-form reveal" action="/api/contact" method="post" novalidate data-contact-form>
+              <div class="form-status" role="status" aria-live="polite" data-form-status></div>
+              <div class="form-row">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" autocomplete="name" required maxlength="100">
+                <span class="field-error" id="name-error"></span>
+              </div>
+              <div class="form-row">
+                <label for="company">Company or organization</label>
+                <input id="company" name="company" type="text" autocomplete="organization" required maxlength="120">
+                <span class="field-error" id="company-error"></span>
+              </div>
+              <div class="form-row">
+                <label for="email">Business email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required maxlength="160">
+                <span class="field-error" id="email-error"></span>
+              </div>
+              <div class="form-row">
+                <label for="phone">Phone</label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" required maxlength="40">
+                <span class="field-error" id="phone-error"></span>
+              </div>
+              <div class="form-row">
+                <label for="employees">Number of employees <span>optional</span></label>
+                <input id="employees" name="employees" type="text" inputmode="numeric" maxlength="30">
+                <span class="field-error" id="employees-error"></span>
+              </div>
+              <div class="form-row">
+                <label for="service">Service needed</label>
+                <select id="service" name="service" required>
+                  <option value="">Select a service</option>
+                  <option>Managed IT Services</option>
+                  <option>Microsoft 365 or Cloud Services</option>
+                  <option>Cybersecurity</option>
+                  <option>Business Voice or VoIP</option>
+                  <option>Network or Managed Wi-Fi</option>
+                  <option>IP Security Camera Systems</option>
+                  <option>Fixed Wireless or Connectivity</option>
+                  <option>Workstation or Infrastructure Support</option>
+                  <option>Technology Consulting</option>
+                  <option>Other</option>
+                </select>
+                <span class="field-error" id="service-error"></span>
+              </div>
+              <div class="form-row form-row--full">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="6" required maxlength="2000"></textarea>
+                <span class="field-error" id="message-error"></span>
+              </div>
+              <div class="form-row form-row--full checkbox-row">
+                <input id="privacy" name="privacy" type="checkbox" required>
+                <label for="privacy">I understand this form sends business contact information so Two River Communications can respond to my request.</label>
+                <span class="field-error" id="privacy-error"></span>
+              </div>
+              <div class="form-row form-row--full turnstile-row" data-turnstile-row hidden>
+                <div data-turnstile-widget></div>
+              </div>
+              <div class="honeypot" aria-hidden="true">
+                <label for="website">Website</label>
+                <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+              </div>
+              <button class="button" type="submit" data-submit-button>Send Message</button>
+            </form>
           </div>
         </div>
       </section>

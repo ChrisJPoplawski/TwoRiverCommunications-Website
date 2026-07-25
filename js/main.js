@@ -8,10 +8,13 @@ const BUSINESS_CONFIG = {
   email: "[EMAIL ADDRESS]",
   domain: "[DOMAIN NAME]",
   streetAddress: "",
-  businessHours: ""
+  businessHours: "",
+  turnstileSiteKey: "[TURNSTILE SITE KEY]"
 };
 
 const PLACEHOLDER_PATTERN = /^\[[^\]]+\]$/;
+const TURNSTILE_SCRIPT_ID = "turnstile-api";
+const TURNSTILE_SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
 const isConfigured = (value) => Boolean(value && !PLACEHOLDER_PATTERN.test(value));
 
@@ -262,6 +265,9 @@ const setupContactForm = () => {
 
   const status = form.querySelector("[data-form-status]");
   const submitButton = form.querySelector("[data-submit-button]");
+  const turnstileRow = form.querySelector("[data-turnstile-row]");
+  const turnstileWidget = form.querySelector("[data-turnstile-widget]");
+  let turnstileWidgetId = null;
   const fields = Array.from(form.querySelectorAll("input, select, textarea")).filter((field) => field.name !== "website");
 
   const setStatus = (message, isError = false) => {
@@ -269,6 +275,54 @@ const setupContactForm = () => {
     status.textContent = message;
     status.classList.toggle("is-error", isError);
   };
+
+  const resetTurnstile = () => {
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
+  };
+
+  const turnstileIsEnabled = () => Boolean(turnstileRow && !turnstileRow.hidden);
+
+  const setupTurnstile = () => {
+    if (!turnstileRow || !turnstileWidget || !isConfigured(BUSINESS_CONFIG.turnstileSiteKey)) {
+      return;
+    }
+
+    turnstileRow.hidden = false;
+
+    const renderTurnstile = () => {
+      if (!window.turnstile || turnstileWidgetId !== null) return;
+      turnstileWidgetId = window.turnstile.render(turnstileWidget, {
+        sitekey: BUSINESS_CONFIG.turnstileSiteKey,
+        action: "contact",
+        "error-callback": () => setStatus("The anti-spam check could not load. Please refresh and try again.", true),
+        "expired-callback": () => setStatus("The anti-spam check expired. Please try again.", true)
+      });
+    };
+
+    if (window.turnstile) {
+      renderTurnstile();
+      return;
+    }
+
+    const existingScript = document.getElementById(TURNSTILE_SCRIPT_ID);
+    if (existingScript) {
+      existingScript.addEventListener("load", renderTurnstile, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = TURNSTILE_SCRIPT_ID;
+    script.src = TURNSTILE_SCRIPT_SRC;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", renderTurnstile, { once: true });
+    script.addEventListener("error", () => setStatus("The anti-spam check could not load. Please refresh and try again.", true), { once: true });
+    document.head.appendChild(script);
+  };
+
+  setupTurnstile();
 
   fields.forEach((field) => {
     field.addEventListener("blur", () => validateField(field));
@@ -294,6 +348,11 @@ const setupContactForm = () => {
     const payload = Object.fromEntries(new FormData(form).entries());
     payload.privacy = form.elements.privacy.checked;
 
+    if (turnstileIsEnabled() && !payload["cf-turnstile-response"]) {
+      setStatus("Please complete the anti-spam check.", true);
+      return;
+    }
+
     if (submitButton) {
       submitButton.disabled = true;
       submitButton.textContent = "Sending...";
@@ -311,13 +370,17 @@ const setupContactForm = () => {
         setStatus("Thank you. Your message was sent successfully.");
         form.reset();
         fields.forEach((field) => setFieldError(field, ""));
+        resetTurnstile();
       } else if (response.status === 503) {
         setStatus(result.message || getBackendFallbackMessage(), true);
+        resetTurnstile();
       } else {
         setStatus(result.message || "Your message could not be sent. Please try again or contact Two River Communications directly.", true);
+        resetTurnstile();
       }
     } catch (error) {
       setStatus(getBackendFallbackMessage(), true);
+      resetTurnstile();
     } finally {
       if (submitButton) {
         submitButton.disabled = false;

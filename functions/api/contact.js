@@ -15,7 +15,8 @@ const limits = {
   employees: 30,
   service: 80,
   message: 2000,
-  website: 120
+  website: 120,
+  turnstileResponse: 4096
 };
 
 const allowedServices = new Set([
@@ -54,6 +55,44 @@ const escapeHtml = (value) =>
 
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+const getClientIp = (request) => {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  return request.headers.get("cf-connecting-ip") || forwardedFor?.split(",")[0]?.trim() || "";
+};
+
+const verifyTurnstile = async ({ secret, token, remoteIp }) => {
+  if (!token) {
+    return { success: false, errorCodes: ["missing-input-response"] };
+  }
+
+  const formData = new FormData();
+  formData.append("secret", secret);
+  formData.append("response", token);
+  if (remoteIp) {
+    formData.append("remoteip", remoteIp);
+  }
+
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    body: formData
+  });
+
+  if (!response.ok) {
+    return { success: false, errorCodes: ["siteverify-unavailable"] };
+  }
+
+  const result = await response.json();
+
+  if (result.success === true && result.action && result.action !== "contact") {
+    return { success: false, errorCodes: ["invalid-action"] };
+  }
+
+  return {
+    success: result.success === true,
+    errorCodes: result["error-codes"] || []
+  };
+};
+
 const parseRequestBody = async (request) => {
   const contentType = request.headers.get("content-type") || "";
 
@@ -79,6 +118,7 @@ const validatePayload = (payload) => {
     service: sanitize(payload.service, limits.service),
     message: sanitize(payload.message, limits.message),
     website: sanitize(payload.website, limits.website),
+    turnstileResponse: sanitize(payload["cf-turnstile-response"], limits.turnstileResponse),
     privacy: payload.privacy === true || payload.privacy === "true" || payload.privacy === "on"
   };
 
@@ -99,7 +139,8 @@ const validatePayload = (payload) => {
   if (!data.privacy) errors.privacy = "Privacy acknowledgment is required.";
 
   Object.entries(limits).forEach(([field, maxLength]) => {
-    if (field !== "website" && normalizedLength(payload[field]) > maxLength) {
+    const payloadField = field === "turnstileResponse" ? "cf-turnstile-response" : field;
+    if (field !== "website" && normalizedLength(payload[payloadField]) > maxLength) {
       errors[field] = `${field} must be ${maxLength} characters or fewer.`;
     }
   });
@@ -147,6 +188,23 @@ export async function onRequest(context) {
       },
       400
     );
+  }
+
+  if (env.TURNSTILE_SECRET_KEY) {
+    let turnstileResult;
+    try {
+      turnstileResult = await verifyTurnstile({
+        secret: env.TURNSTILE_SECRET_KEY,
+        token: validation.data.turnstileResponse,
+        remoteIp: getClientIp(request)
+      });
+    } catch (error) {
+      return json({ success: false, message: "The anti-spam check could not be verified right now. Please try again." }, 502);
+    }
+
+    if (!turnstileResult.success) {
+      return json({ success: false, message: "Please complete the anti-spam verification and try again." }, 400);
+    }
   }
 
   const resendApiKey = env.RESEND_API_KEY;
