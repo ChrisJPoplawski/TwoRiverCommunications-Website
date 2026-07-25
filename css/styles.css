@@ -124,21 +124,18 @@ textarea {
   line-height: 1.08;
 }
 
+.section-intro h2:last-child,
+.feature-copy h2:last-child,
+.final-cta h2:last-child {
+  margin-bottom: 0;
+}
+
 .section-intro p,
 .feature-copy p,
 .contact-copy p {
   margin: 0 0 18px;
   color: var(--brand-muted);
   font-size: 1.05rem;
-}
-
-.eyebrow {
-  margin: 0 0 14px;
-  color: var(--brand-teal-dark);
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
 .button {
@@ -300,39 +297,28 @@ textarea {
 
 .hero {
   position: relative;
-  min-height: auto;
+  min-height: min(620px, calc(100svh - var(--header-height)));
   display: flex;
   align-items: center;
-  padding: 88px 0 66px;
+  padding: 92px 0 76px;
   overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(238, 247, 248, 0.96) 0%, rgba(255, 255, 255, 0.92) 45%, rgba(240, 249, 249, 0.86) 100%);
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: auto -8% -120px -8%;
-  height: 240px;
-  background:
-    repeating-linear-gradient(168deg, transparent 0 28px, rgba(0, 155, 157, 0.1) 29px 30px),
-    linear-gradient(90deg, rgba(8, 116, 201, 0.08), rgba(0, 155, 157, 0.12));
-  transform: skewY(-4deg);
+    linear-gradient(90deg, rgba(7, 55, 101, 0.92) 0%, rgba(7, 55, 101, 0.78) 48%, rgba(7, 55, 101, 0.34) 100%),
+    linear-gradient(180deg, rgba(19, 43, 58, 0.18), rgba(19, 43, 58, 0.56)),
+    url("../assets/lehigh-valley-river-view.jpg") center 58% / cover no-repeat;
 }
 
 .hero-grid {
   position: relative;
-  max-width: 820px;
-  margin-inline: auto;
 }
 
 .hero-copy {
-  max-width: 820px;
+  max-width: 760px;
 }
 
 h1 {
   margin: 0 0 22px;
-  color: var(--brand-dark);
+  color: var(--brand-white);
   font-size: clamp(2.35rem, 5vw, 4.4rem);
   line-height: 1.04;
   text-wrap: balance;
@@ -341,9 +327,34 @@ h1 {
 .hero-lede {
   max-width: 610px;
   margin: 0 0 30px;
-  color: var(--brand-text);
+  color: rgba(255, 255, 255, 0.9);
   font-size: clamp(1.05rem, 1.6vw, 1.22rem);
   line-height: 1.58;
+}
+
+.hero .button {
+  border-color: var(--brand-teal);
+  background: var(--brand-teal);
+  color: var(--brand-white);
+}
+
+.hero .button:hover,
+.hero .button:focus-visible {
+  border-color: #00b3b4;
+  background: #00a9aa;
+}
+
+.hero .button--secondary {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--brand-navy);
+}
+
+.hero .button--secondary:hover,
+.hero .button--secondary:focus-visible {
+  border-color: var(--brand-white);
+  background: var(--brand-white);
+  color: var(--brand-navy);
 }
 
 .hero-actions,
@@ -352,12 +363,6 @@ h1 {
   flex-wrap: wrap;
   gap: 14px;
   align-items: center;
-}
-
-.trust-line {
-  margin: 24px 0 0;
-  color: var(--brand-navy);
-  font-weight: 800;
 }
 
 .trust-strip {
@@ -465,18 +470,6 @@ h1 {
   grid-template-columns: minmax(320px, 0.88fr) minmax(0, 1fr);
 }
 
-.callout {
-  margin-top: 22px;
-  padding: 16px 18px;
-  border-left: 5px solid var(--brand-teal);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  background: var(--brand-white);
-  color: var(--brand-navy);
-  font-size: 1.22rem;
-  font-weight: 850;
-  box-shadow: var(--shadow-soft);
-}
-
 .check-panel,
 .about-points {
   padding: 22px;
@@ -559,13 +552,8 @@ h1 {
 }
 
 .dark-section .section-intro h2,
-.dark-section .section-intro p,
-.dark-section .eyebrow {
+.dark-section .section-intro p {
   color: var(--brand-white);
-}
-
-.dark-section .eyebrow {
-  opacity: 0.86;
 }
 
 .benefit-grid {
@@ -630,11 +618,6 @@ h1 {
   margin-right: 12px;
   border-radius: 999px;
   background: linear-gradient(var(--brand-blue), var(--brand-teal));
-}
-
-.muted-note {
-  color: var(--brand-muted);
-  font-size: 0.96rem;
 }
 
 .contact-section {
