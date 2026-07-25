@@ -1,0 +1,195 @@
+const json = (body, status = 200, headers = {}) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      ...headers
+    }
+  });
+
+const limits = {
+  name: 100,
+  company: 120,
+  email: 160,
+  phone: 40,
+  employees: 30,
+  service: 80,
+  message: 2000,
+  website: 120
+};
+
+const allowedServices = new Set([
+  "Managed IT Services",
+  "Microsoft 365 or Cloud Services",
+  "Cybersecurity",
+  "Business Voice or VoIP",
+  "Network or Managed Wi-Fi",
+  "IP Security Camera Systems",
+  "Fixed Wireless or Connectivity",
+  "Workstation or Infrastructure Support",
+  "Technology Consulting",
+  "Other"
+]);
+
+const sanitize = (value, maxLength) =>
+  String(value || "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+
+const normalizedLength = (value) =>
+  String(value || "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim().length;
+
+const escapeHtml = (value) =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const parseRequestBody = async (request) => {
+  const contentType = request.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return request.json();
+  }
+
+  if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+    const formData = await request.formData();
+    return Object.fromEntries(formData.entries());
+  }
+
+  return {};
+};
+
+const validatePayload = (payload) => {
+  const data = {
+    name: sanitize(payload.name, limits.name),
+    company: sanitize(payload.company, limits.company),
+    email: sanitize(payload.email, limits.email).toLowerCase(),
+    phone: sanitize(payload.phone, limits.phone),
+    employees: sanitize(payload.employees, limits.employees),
+    service: sanitize(payload.service, limits.service),
+    message: sanitize(payload.message, limits.message),
+    website: sanitize(payload.website, limits.website),
+    privacy: payload.privacy === true || payload.privacy === "true" || payload.privacy === "on"
+  };
+
+  const errors = {};
+
+  if (data.website) {
+    errors.website = "Invalid submission.";
+  }
+
+  if (!data.name) errors.name = "Name is required.";
+  if (!data.company) errors.company = "Company or organization is required.";
+  if (!data.email) errors.email = "Business email is required.";
+  if (data.email && !isEmail(data.email)) errors.email = "Enter a valid business email address.";
+  if (!data.phone) errors.phone = "Phone is required.";
+  if (!data.service) errors.service = "Service needed is required.";
+  if (data.service && !allowedServices.has(data.service)) errors.service = "Select a valid service.";
+  if (!data.message) errors.message = "Message is required.";
+  if (!data.privacy) errors.privacy = "Privacy acknowledgment is required.";
+
+  Object.entries(limits).forEach(([field, maxLength]) => {
+    if (field !== "website" && normalizedLength(payload[field]) > maxLength) {
+      errors[field] = `${field} must be ${maxLength} characters or fewer.`;
+    }
+  });
+
+  return {
+    data,
+    errors,
+    valid: Object.keys(errors).length === 0
+  };
+};
+
+const createEmailHtml = (data) => `
+  <h1>New Two River Communications website inquiry</h1>
+  <p><strong>Name:</strong> ${escapeHtml(data.name)}</p>
+  <p><strong>Company or organization:</strong> ${escapeHtml(data.company)}</p>
+  <p><strong>Business email:</strong> ${escapeHtml(data.email)}</p>
+  <p><strong>Phone:</strong> ${escapeHtml(data.phone)}</p>
+  <p><strong>Number of employees:</strong> ${escapeHtml(data.employees || "Not provided")}</p>
+  <p><strong>Service needed:</strong> ${escapeHtml(data.service)}</p>
+  <p><strong>Message:</strong></p>
+  <p>${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
+`;
+
+export async function onRequest(context) {
+  const { request, env } = context;
+
+  if (request.method !== "POST") {
+    return json({ success: false, message: "Method not allowed." }, 405, { allow: "POST" });
+  }
+
+  let payload;
+  try {
+    payload = await parseRequestBody(request);
+  } catch (error) {
+    return json({ success: false, message: "Request body could not be read." }, 400);
+  }
+
+  const validation = validatePayload(payload);
+  if (!validation.valid) {
+    return json(
+      {
+        success: false,
+        message: "Please correct the highlighted fields.",
+        errors: validation.errors
+      },
+      400
+    );
+  }
+
+  const resendApiKey = env.RESEND_API_KEY;
+  const toEmail = env.CONTACT_TO_EMAIL;
+  const fromEmail = env.CONTACT_FROM_EMAIL;
+
+  if (!resendApiKey || !toEmail || !fromEmail) {
+    return json(
+      {
+        success: false,
+        message: "The contact form is not configured yet. Please contact Two River Communications directly by email when the email address has been added."
+      },
+      503
+    );
+  }
+
+  const emailResponse = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${resendApiKey}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [toEmail],
+      reply_to: validation.data.email,
+      subject: `Website inquiry from ${validation.data.company}`,
+      html: createEmailHtml(validation.data)
+    })
+  });
+
+  if (!emailResponse.ok) {
+    return json(
+      {
+        success: false,
+        message: "The message could not be sent right now. Please try again or contact Two River Communications directly."
+      },
+      502
+    );
+  }
+
+  return json({
+    success: true,
+    message: "Thank you. Your message was sent successfully."
+  });
+}
