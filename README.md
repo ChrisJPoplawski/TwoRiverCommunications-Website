@@ -7,6 +7,7 @@ Production-ready static single-page website for Two River Communications, LLC. T
 ```text
 /
 ├── index.html
+├── privacy-policy.html
 ├── css/
 │   └── styles.css
 ├── js/
@@ -93,9 +94,9 @@ When `TURNSTILE_SECRET_KEY` is set, `/api/contact` requires a valid Turnstile to
 
 For additional protection, add a Cloudflare WAF rate limiting rule for `POST /api/contact` so repeated submissions from the same client are challenged or blocked before they reach the Pages Function.
 
-## SEO Updates
+## SEO Checks
 
-Before launch, update these placeholders:
+Before launch, confirm these values are still correct:
 
 - Canonical URL in `index.html`
 - Open Graph URL and image URL in `index.html`
@@ -111,11 +112,9 @@ Replace every placeholder before launch:
 
 - `[PHONE NUMBER]`
 - `[EMAIL ADDRESS]`
-- `[DOMAIN NAME]`
 - `[TURNSTILE SITE KEY]`
 - Business hours, if they should be shown
 - Street address, only if it should be public
-- Privacy Policy placeholder
 
 ## Prelaunch Checks
 

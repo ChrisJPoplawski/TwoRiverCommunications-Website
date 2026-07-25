@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://[DOMAIN NAME]/sitemap.xml
+Sitemap: https://tworivercomms.com/sitemap.xml

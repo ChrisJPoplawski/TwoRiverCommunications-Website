@@ -653,6 +653,57 @@ h1 {
   background: linear-gradient(var(--brand-blue), var(--brand-teal));
 }
 
+.policy-section {
+  background: linear-gradient(180deg, var(--brand-white), var(--brand-light));
+}
+
+.policy-content {
+  max-width: 900px;
+  padding: 34px;
+  border: 1px solid var(--brand-line);
+  border-radius: var(--radius);
+  background: var(--brand-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.policy-kicker {
+  margin: 0 0 12px;
+  color: var(--brand-teal-dark);
+  font-weight: 850;
+}
+
+.policy-content h1 {
+  margin: 0 0 24px;
+  color: var(--brand-dark);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1.04;
+}
+
+.policy-content h2 {
+  margin: 34px 0 12px;
+  color: var(--brand-dark);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1.16;
+}
+
+.policy-content h3 {
+  margin: 22px 0 10px;
+  color: var(--brand-navy);
+  font-size: 1.15rem;
+}
+
+.policy-content p,
+.policy-content li {
+  color: var(--brand-text);
+}
+
+.policy-content ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 22px;
+  margin: 0 0 18px;
+}
+
 .contact-section {
   background: linear-gradient(180deg, var(--brand-white), var(--brand-light));
 }
@@ -1003,6 +1054,10 @@ textarea:focus {
 
   .contact-form {
     padding: 18px;
+  }
+
+  .policy-content {
+    padding: 22px;
   }
 
   .checkbox-row {

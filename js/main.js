@@ -6,7 +6,7 @@ const BUSINESS_CONFIG = {
   serviceArea: "The Lehigh Valley and surrounding area",
   phone: "[PHONE NUMBER]",
   email: "[EMAIL ADDRESS]",
-  domain: "[DOMAIN NAME]",
+  domain: "tworivercomms.com",
   streetAddress: "",
   businessHours: "",
   turnstileSiteKey: "[TURNSTILE SITE KEY]"
