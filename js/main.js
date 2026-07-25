@@ -3,7 +3,7 @@
 const BUSINESS_CONFIG = {
   legalName: "Two River Communications, LLC",
   displayName: "Two River Communications",
-  serviceArea: "Easton, Pennsylvania and the greater Lehigh Valley",
+  serviceArea: "The Lehigh Valley and surrounding area",
   phone: "[PHONE NUMBER]",
   email: "[EMAIL ADDRESS]",
   domain: "[DOMAIN NAME]",
