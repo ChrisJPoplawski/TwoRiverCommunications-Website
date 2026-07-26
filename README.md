@@ -42,7 +42,7 @@ The contact form endpoint requires Cloudflare Pages Functions or a compatible lo
 2. In Cloudflare Pages, create a project from the GitHub repository.
 3. Use no build command.
 4. Set the output directory to `/`.
-5. Add the Resend environment variables listed below.
+5. Add the Microsoft Graph environment variables listed below.
 6. Add the Turnstile environment variable listed below.
 7. Deploy.
 
@@ -73,14 +73,23 @@ To replace it, use the same filename or update the image paths in `index.html`. 
 
 ## Contact Form Configuration
 
-The optional Cloudflare Pages Function sends mail through Resend and can verify Cloudflare Turnstile tokens before sending. Configure these environment variables in Cloudflare Pages:
+The optional Cloudflare Pages Function sends mail through Microsoft Graph and verifies Cloudflare Turnstile tokens before sending. Configure these environment variables in Cloudflare Pages:
 
-- `RESEND_API_KEY`
+- `MS_TENANT_ID`
+- `MS_CLIENT_ID`
+- `MS_CLIENT_SECRET`
+- `MS_FROM_EMAIL`
 - `CONTACT_TO_EMAIL`
-- `CONTACT_FROM_EMAIL`
 - `TURNSTILE_SECRET`
 
-The browser never receives the Resend API key or the Turnstile secret. If any required variable is missing, `/api/contact` returns `503` and the form tells the visitor the form is not configured.
+The browser never receives the Microsoft client secret or the Turnstile secret. If any required variable is missing, `/api/contact` returns `503` and the form tells the visitor the form is not configured.
+
+Microsoft Graph notes:
+
+- `MS_FROM_EMAIL` should be the shared mailbox address used to send contact form emails.
+- `CONTACT_TO_EMAIL` is where form submissions are delivered. Use a comma-separated list for multiple recipients.
+- The Entra app must have Microsoft Graph `Mail.Send` application permission and admin consent.
+- Restrict the app to the shared mailbox in Exchange Online so it cannot send as every mailbox in the tenant.
 
 Turnstile is already embedded with the public site key in `js/main.js` and `index.html`. To finish the backend protection:
 

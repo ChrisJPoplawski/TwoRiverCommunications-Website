@@ -165,6 +165,76 @@ const createEmailHtml = (data) => `
   <p>${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
 `;
 
+const getGraphAccessToken = async ({ tenantId, clientId, clientSecret }) => {
+  const tokenResponse = await fetch(`https://login.microsoftonline.com/${encodeURIComponent(tenantId)}/oauth2/v2.0/token`, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: "client_credentials",
+      scope: "https://graph.microsoft.com/.default"
+    })
+  });
+
+  const tokenResult = await tokenResponse.json().catch(() => ({}));
+
+  if (!tokenResponse.ok || !tokenResult.access_token) {
+    throw new Error(`Microsoft Graph token request failed with status ${tokenResponse.status}`);
+  }
+
+  return tokenResult.access_token;
+};
+
+const sendGraphEmail = async ({ env, data }) => {
+  const accessToken = await getGraphAccessToken({
+    tenantId: env.MS_TENANT_ID,
+    clientId: env.MS_CLIENT_ID,
+    clientSecret: env.MS_CLIENT_SECRET
+  });
+
+  const fromEmail = env.MS_FROM_EMAIL;
+  const toRecipients = env.CONTACT_TO_EMAIL.split(",")
+    .map((email) => email.trim())
+    .filter(Boolean)
+    .map((email) => ({ emailAddress: { address: email } }));
+
+  const emailResponse = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(fromEmail)}/sendMail`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      message: {
+        subject: `Website inquiry from ${data.company}`,
+        body: {
+          contentType: "HTML",
+          content: createEmailHtml(data)
+        },
+        toRecipients,
+        replyTo: [
+          {
+            emailAddress: {
+              address: data.email,
+              name: data.name
+            }
+          }
+        ]
+      },
+      saveToSentItems: true
+    })
+  });
+
+  if (!emailResponse.ok) {
+    const errorText = await emailResponse.text().catch(() => "");
+    throw new Error(`Microsoft Graph sendMail failed with status ${emailResponse.status}: ${errorText.slice(0, 300)}`);
+  }
+};
+
+const microsoftGraphIsConfigured = (env) =>
+  Boolean(env.MS_TENANT_ID && env.MS_CLIENT_ID && env.MS_CLIENT_SECRET && env.MS_FROM_EMAIL && env.CONTACT_TO_EMAIL);
+
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -203,6 +273,7 @@ export async function onRequest(context) {
       remoteIp: getClientIp(request)
     });
   } catch (error) {
+    console.error("Turnstile verification failed", error);
     return json({ success: false, message: "The anti-spam check could not be verified right now. Please try again." }, 502);
   }
 
@@ -210,36 +281,20 @@ export async function onRequest(context) {
     return json({ success: false, message: "Please complete the anti-spam verification and try again." }, 400);
   }
 
-  const resendApiKey = env.RESEND_API_KEY;
-  const toEmail = env.CONTACT_TO_EMAIL;
-  const fromEmail = env.CONTACT_FROM_EMAIL;
-
-  if (!resendApiKey || !toEmail || !fromEmail) {
+  if (!microsoftGraphIsConfigured(env)) {
     return json(
       {
         success: false,
-        message: "The contact form is not configured yet. Please contact Two River Communications directly by email when the email address has been added."
+        message: "The contact form email service is not configured yet."
       },
       503
     );
   }
 
-  const emailResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${resendApiKey}`,
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: [toEmail],
-      reply_to: validation.data.email,
-      subject: `Website inquiry from ${validation.data.company}`,
-      html: createEmailHtml(validation.data)
-    })
-  });
-
-  if (!emailResponse.ok) {
+  try {
+    await sendGraphEmail({ env, data: validation.data });
+  } catch (error) {
+    console.error("Contact form email failed", error);
     return json(
       {
         success: false,
