@@ -12,6 +12,7 @@ Production-ready static single-page website for Two River Communications, LLC. T
 │   └── styles.css
 ├── js/
 │   └── main.js
+├── _worker.js
 ├── assets/
 │   └── two-river-communications-logo.png
 ├── functions/
@@ -46,7 +47,9 @@ The contact form endpoint requires Cloudflare Pages Functions or a compatible lo
 6. Add the Turnstile environment variable listed below.
 7. Deploy.
 
-Cloudflare Pages will detect `functions/api/contact.js` and expose it at `/api/contact`.
+Cloudflare Pages should detect `functions/api/contact.js` and expose it at `/api/contact`.
+
+This repo also includes `_worker.js` as a Cloudflare Pages fallback route. It handles `POST /api/contact` directly and passes all other requests through to static assets with `env.ASSETS.fetch(request)`. If the live site returns `404` for `/api/contact`, confirm Cloudflare Pages is deploying the latest commit from this repository and that the output directory is `/`.
 
 ## GitHub Deployment
 
