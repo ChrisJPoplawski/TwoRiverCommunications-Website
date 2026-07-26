@@ -235,6 +235,9 @@ const sendGraphEmail = async ({ env, data }) => {
 const microsoftGraphIsConfigured = (env) =>
   Boolean(env.MS_TENANT_ID && env.MS_CLIENT_ID && env.MS_CLIENT_SECRET && env.MS_FROM_EMAIL && env.CONTACT_TO_EMAIL);
 
+const getTurnstileSecret = (env) =>
+  env.TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY || env.CF_TURNSTILE_SECRET || env.CLOUDFLARE_TURNSTILE_SECRET;
+
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -261,14 +264,16 @@ export async function onRequest(context) {
     );
   }
 
-  if (!env.TURNSTILE_SECRET) {
+  const turnstileSecret = getTurnstileSecret(env);
+
+  if (!turnstileSecret) {
     return json({ success: false, message: "The contact form anti-spam check is not configured yet." }, 503);
   }
 
   let turnstileResult;
   try {
     turnstileResult = await verifyTurnstile({
-      secret: env.TURNSTILE_SECRET,
+      secret: turnstileSecret,
       token: validation.data.turnstileResponse,
       remoteIp: getClientIp(request)
     });
