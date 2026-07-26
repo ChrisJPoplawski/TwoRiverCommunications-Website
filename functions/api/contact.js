@@ -232,14 +232,33 @@ const sendGraphEmail = async ({ env, data }) => {
   }
 };
 
+const microsoftGraphVariableNames = ["MS_TENANT_ID", "MS_CLIENT_ID", "MS_CLIENT_SECRET", "MS_FROM_EMAIL", "CONTACT_TO_EMAIL"];
+
+const hasEnvValue = (env, name) => String(env[name] || "").trim().length > 0;
+
+const getMissingMicrosoftGraphVariables = (env) =>
+  microsoftGraphVariableNames.filter((name) => !hasEnvValue(env, name));
+
 const microsoftGraphIsConfigured = (env) =>
-  Boolean(env.MS_TENANT_ID && env.MS_CLIENT_ID && env.MS_CLIENT_SECRET && env.MS_FROM_EMAIL && env.CONTACT_TO_EMAIL);
+  getMissingMicrosoftGraphVariables(env).length === 0;
 
 const getTurnstileSecret = (env) =>
   env.TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY || env.CF_TURNSTILE_SECRET || env.CLOUDFLARE_TURNSTILE_SECRET;
 
+const handleConfigCheck = (env) =>
+  json({
+    contactRoute: "ok",
+    turnstileConfigured: Boolean(getTurnstileSecret(env)),
+    microsoftGraphConfigured: microsoftGraphIsConfigured(env),
+    missingMicrosoftGraphVariables: getMissingMicrosoftGraphVariables(env)
+  });
+
 export async function onRequest(context) {
   const { request, env } = context;
+
+  if (request.method === "GET") {
+    return handleConfigCheck(env);
+  }
 
   if (request.method !== "POST") {
     return json({ success: false, message: "Method not allowed." }, 405, { allow: "POST" });
@@ -286,11 +305,14 @@ export async function onRequest(context) {
     return json({ success: false, message: "Please complete the anti-spam verification and try again." }, 400);
   }
 
-  if (!microsoftGraphIsConfigured(env)) {
+  const missingMicrosoftGraphVariables = getMissingMicrosoftGraphVariables(env);
+
+  if (missingMicrosoftGraphVariables.length > 0) {
     return json(
       {
         success: false,
-        message: "The contact form email service is not configured yet."
+        message: "The contact form email service is not configured yet.",
+        missingConfiguration: missingMicrosoftGraphVariables
       },
       503
     );
