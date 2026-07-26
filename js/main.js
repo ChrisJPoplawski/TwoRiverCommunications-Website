@@ -367,7 +367,7 @@ const setupContactForm = () => {
       const result = await response.json().catch(() => ({}));
 
       if (response.ok && result.success === true) {
-        setStatus("Thank you. Your message was sent successfully.");
+        setStatus("Message received. Two River Communications will reach out soon.");
         form.reset();
         fields.forEach((field) => setFieldError(field, ""));
         resetTurnstile();

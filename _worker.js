@@ -311,7 +311,7 @@ async function onRequest(context) {
 
   return json({
     success: true,
-    message: "Thank you. Your message was sent successfully."
+    message: "Message received. Two River Communications will reach out soon."
   });
 }
 
