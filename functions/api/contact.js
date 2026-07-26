@@ -74,7 +74,8 @@ const verifyTurnstile = async ({ secret, token, remoteIp }) => {
 
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
-    body: formData
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData)
   });
 
   if (!response.ok) {
@@ -83,7 +84,7 @@ const verifyTurnstile = async ({ secret, token, remoteIp }) => {
 
   const result = await response.json();
 
-  if (result.success === true && result.action && result.action !== "contact") {
+  if (result.success === true && result.action && result.action !== "turnstile-spin-v2") {
     return { success: false, errorCodes: ["invalid-action"] };
   }
 
@@ -190,21 +191,23 @@ export async function onRequest(context) {
     );
   }
 
-  if (env.TURNSTILE_SECRET_KEY) {
-    let turnstileResult;
-    try {
-      turnstileResult = await verifyTurnstile({
-        secret: env.TURNSTILE_SECRET_KEY,
-        token: validation.data.turnstileResponse,
-        remoteIp: getClientIp(request)
-      });
-    } catch (error) {
-      return json({ success: false, message: "The anti-spam check could not be verified right now. Please try again." }, 502);
-    }
+  if (!env.TURNSTILE_SECRET) {
+    return json({ success: false, message: "The contact form anti-spam check is not configured yet." }, 503);
+  }
 
-    if (!turnstileResult.success) {
-      return json({ success: false, message: "Please complete the anti-spam verification and try again." }, 400);
-    }
+  let turnstileResult;
+  try {
+    turnstileResult = await verifyTurnstile({
+      secret: env.TURNSTILE_SECRET,
+      token: validation.data.turnstileResponse,
+      remoteIp: getClientIp(request)
+    });
+  } catch (error) {
+    return json({ success: false, message: "The anti-spam check could not be verified right now. Please try again." }, 502);
+  }
+
+  if (!turnstileResult.success) {
+    return json({ success: false, message: "Please complete the anti-spam verification and try again." }, 400);
   }
 
   const resendApiKey = env.RESEND_API_KEY;

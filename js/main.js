@@ -9,7 +9,7 @@ const BUSINESS_CONFIG = {
   domain: "tworivercomms.com",
   streetAddress: "",
   businessHours: "",
-  turnstileSiteKey: "[TURNSTILE SITE KEY]"
+  turnstileSiteKey: "0x4AAAAAAD-ZqJrwyuQvV1Kd"
 };
 
 const PLACEHOLDER_PATTERN = /^\[[^\]]+\]$/;
@@ -294,8 +294,8 @@ const setupContactForm = () => {
     const renderTurnstile = () => {
       if (!window.turnstile || turnstileWidgetId !== null) return;
       turnstileWidgetId = window.turnstile.render(turnstileWidget, {
-        sitekey: BUSINESS_CONFIG.turnstileSiteKey,
-        action: "contact",
+        sitekey: turnstileWidget.dataset.sitekey || BUSINESS_CONFIG.turnstileSiteKey,
+        action: turnstileWidget.dataset.action || "turnstile-spin-v2",
         "error-callback": () => setStatus("The anti-spam check could not load. Please refresh and try again.", true),
         "expired-callback": () => setStatus("The anti-spam check expired. Please try again.", true)
       });
