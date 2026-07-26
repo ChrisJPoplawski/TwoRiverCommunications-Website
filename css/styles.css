@@ -735,8 +735,14 @@ h1 {
   background: linear-gradient(180deg, var(--brand-white), var(--brand-light));
 }
 
+.contact-intro {
+  margin-inline: auto;
+  text-align: center;
+}
+
 .contact-grid {
   max-width: 860px;
+  margin-inline: auto;
 }
 
 .contact-form {
