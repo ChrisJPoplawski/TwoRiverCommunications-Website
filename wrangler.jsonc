@@ -6,6 +6,12 @@
   "observability": {
     "enabled": true
   },
+  "vars": {
+    "CONTACT_TO_EMAIL": "cpoplawski@tworivercomms.com",
+    "MS_CLIENT_ID": "548406a5-d8a4-47e8-a0f0-f22f4ee8b232",
+    "MS_FROM_EMAIL": "website@tworivercomms.com",
+    "MS_TENANT_ID": "1a0c7c97-b9dd-42c2-b1ed-e5a12178142f"
+  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
