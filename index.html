@@ -251,7 +251,6 @@
 
           <div class="contact-grid">
             <form class="contact-form reveal" action="/api/contact" method="post" novalidate data-contact-form>
-              <div class="form-status" role="status" aria-live="polite" data-form-status></div>
               <div class="form-row">
                 <label for="name">Name</label>
                 <input id="name" name="name" type="text" autocomplete="name" required maxlength="100">
@@ -307,6 +306,7 @@
               <div class="form-row form-row--full turnstile-row" data-turnstile-row hidden>
                 <div class="cf-turnstile" data-sitekey="0x4AAAAAAD-ZqJrwyuQvV1Kd" data-action="turnstile-spin-v2" data-turnstile-widget></div>
               </div>
+              <div class="form-status" role="status" aria-live="polite" data-form-status></div>
               <div class="honeypot" aria-hidden="true">
                 <label for="website">Website</label>
                 <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">

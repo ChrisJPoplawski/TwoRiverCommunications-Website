@@ -806,13 +806,24 @@ textarea:focus {
 }
 
 .form-status {
-  min-height: 1.5em;
+  display: none;
+  min-height: 0;
   margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 155, 157, 0.28);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 155, 157, 0.08);
   color: var(--brand-navy);
   font-weight: 800;
 }
 
+.form-status:not(:empty) {
+  display: block;
+}
+
 .form-status.is-error {
+  border-color: rgba(159, 40, 40, 0.28);
+  background: rgba(159, 40, 40, 0.08);
   color: #9f2828;
 }
 
