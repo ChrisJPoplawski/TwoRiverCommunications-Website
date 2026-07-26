@@ -8,6 +8,8 @@ Production-ready static single-page website for Two River Communications, LLC. T
 /
 ├── index.html
 ├── privacy-policy.html
+├── wrangler.jsonc
+├── .assetsignore
 ├── css/
 │   └── styles.css
 ├── js/
@@ -49,7 +51,7 @@ The contact form endpoint requires Cloudflare Pages Functions or a compatible lo
 
 Cloudflare Pages should detect `functions/api/contact.js` and expose it at `/api/contact`.
 
-This repo also includes `_worker.js` as a Cloudflare Pages fallback route. It handles `POST /api/contact` directly and passes all other requests through to static assets with `env.ASSETS.fetch(request)`. If the live site returns `404` for `/api/contact`, confirm Cloudflare Pages is deploying the latest commit from this repository and that the output directory is `/`.
+This repo also includes `_worker.js` as the Cloudflare Worker route. It handles `POST /api/contact` directly and passes all other requests through to static assets with `env.ASSETS.fetch(request)`. The `wrangler.jsonc` file points Cloudflare to `_worker.js`, and `.assetsignore` prevents server-side files from being uploaded as public static assets.
 
 ## GitHub Deployment
 
