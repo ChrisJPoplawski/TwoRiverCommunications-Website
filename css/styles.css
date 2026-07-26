@@ -314,7 +314,8 @@ textarea {
   background:
     linear-gradient(90deg, rgba(7, 55, 101, 0.92) 0%, rgba(7, 55, 101, 0.78) 48%, rgba(7, 55, 101, 0.34) 100%),
     linear-gradient(180deg, rgba(19, 43, 58, 0.18), rgba(19, 43, 58, 0.56)),
-    url("../assets/lehigh-valley-river-view.jpg") center 58% / cover no-repeat;
+    url("../assets/lehigh-valley-river-view.jpg") center 58% / cover no-repeat fixed,
+    var(--brand-navy);
 }
 
 .hero-grid {
@@ -979,6 +980,7 @@ textarea:focus {
   .hero {
     min-height: auto;
     padding: 52px 0 50px;
+    background-attachment: scroll;
   }
 
   .dark-section {
